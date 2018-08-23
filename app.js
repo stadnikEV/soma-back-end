@@ -3,6 +3,7 @@ const http = require('http');
 const logger = require('./libs/log'); // логирование в консоль
 const morgan = require('morgan'); // логирование запросов с клиента в консоль
 const bodyParser = require('body-parser');
+var fs = require('fs');
 
 
 const app = express();
@@ -23,16 +24,36 @@ const xlsxj = require("xlsx-to-json");
 
 app.post('/getDataBase', (reg, res) => {
   xlsxj({
-    input: "1.xlsx",
-    output: "output.json",
+    input: "db-excel.xlsx",
+    output: "db-excel.json",
   }, function(err, result) {
     if(err) {
+      res.json(result);
       console.error(err);
     }else {
       res.json(result);
     }
   });
 });
+
+app.post('/getBitrixDB', (reg, res) => {
+  fs.readFile('companies.json', 'utf8', function(err, contents) {
+    res.json(contents);
+  });
+});
+
+
+// xlsxj({
+//   input: "companies.xlsx",
+//   output: "companies.json",
+// }, function(err, result) {
+//   if(err) {
+//     console.error(err);
+//   }else {
+//     console.error('ok');
+//   }
+// });
+
 
 
 

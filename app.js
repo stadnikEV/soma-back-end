@@ -43,16 +43,16 @@ app.post('/getBitrixDB', (reg, res) => {
 });
 
 
-// xlsxj({
-//   input: "companies.xlsx",
-//   output: "companies.json",
-// }, function(err, result) {
-//   if(err) {
-//     console.error(err);
-//   }else {
-//     console.error('ok');
-//   }
-// });
+xlsxj({
+  input: "companies.xlsx",
+  output: "companies.json",
+}, function(err, result) {
+  if(err) {
+    console.error(err);
+  }else {
+    console.error('ok');
+  }
+});
 
 
 

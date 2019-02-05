@@ -4,6 +4,8 @@ const logger = require('./libs/log'); // логирование в консол�
 const morgan = require('morgan'); // логирование запросов с клиента в консоль
 const bodyParser = require('body-parser');
 var fs = require('fs');
+const xlsxj = require("xlsx-to-json");
+const HttpError = require('./error');
 
 
 const app = express();
@@ -19,8 +21,15 @@ app.use((req, res, next) => {
   next();
 });
 
+// app.use((req, res, next) => {
+//   res.header('Access-Control-Allow-Origin', '*');
+//   res.header('Access-Control-Allow-Credentials', true);
+//   res.header('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With');
+//   res.header('Access-Control-Allow-Methods', 'PUT, GET, POST', 'OPTIONS');
+//
+//   next();
+// });
 
-const xlsxj = require("xlsx-to-json");
 
 app.post('/getDataBase', (reg, res) => {
   xlsxj({
@@ -36,25 +45,43 @@ app.post('/getDataBase', (reg, res) => {
   });
 });
 
-app.post('/getBitrixDB', (reg, res) => {
-  fs.readFile('companies.json', 'utf8', function(err, contents) {
-    res.json(contents);
-  });
-});
+require('./routes')({ app });
+
+// app.post('/getBitrixDB', (reg, res) => {
+//   fs.readFile('companies.json', 'utf8', function(err, contents) {
+//     res.json(contents);
+//   });
+// });
 
 
-xlsxj({
-  input: "companies.xlsx",
-  output: "companies.json",
-}, function(err, result) {
-  if(err) {
-    console.error(err);
-  }else {
-    console.error('ok');
+// xlsxj({
+//   input: "companies.xlsx",
+//   output: "companies.json",
+// }, function(err) {
+//   if(err) {
+//     console.log(err);
+//   }else {
+//     console.log('ok');
+//   }
+// });
+
+
+app.use((err, req, res, next) => {
+  if (res.headersSent) {
+    logger.error(err.stack);
+    return;
   }
+  if (err instanceof HttpError) {
+    res.sendHttpError(err);
+    logger.error(err.stack);
+    return;
+  }
+  logger.error(err.stack);
+  res.sendHttpError(new HttpError({
+    status: 500,
+    message: 'server Error',
+  }));
 });
-
-
 
 
 http.createServer(app).listen(8080, () => {

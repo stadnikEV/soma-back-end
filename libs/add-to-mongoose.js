@@ -6,6 +6,7 @@ const jsonFileToObject = require("./json-file-to-object");
 const getName = require("./get-name");
 const saveAll = require("./mongoose-save-all");
 const getEmail = require("./get-email");
+const getFioFromComment = require("./get-fio-from-comment");
 const Company = require('../models/company');
 
     let data = null;
@@ -26,8 +27,15 @@ const Company = require('../models/company');
 
         data.forEach((row) => {
 
-          const name = getName({ fio: row.ФИО.toLowerCase() });
+          const fio = getFioFromComment({ comment: row.Комментарий });
+
+          if (!fio) {
+            console.log(`Не корректное имя: ${row.Комментарий}`);
+            return;
+          }
+          const name = getName({ fio: fio.toLowerCase() });
           if (!name) {
+            console.log(`Не корректное имя: ${fio}`);
             return;
           }
           const company = new Company({

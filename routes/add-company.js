@@ -23,6 +23,6 @@ module.exports = (req, res, next) => {
       res.json({});
     })
     .catch((e) => {
-      console.log(e);
+      next(e);
     });
 };

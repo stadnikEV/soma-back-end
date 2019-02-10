@@ -21,14 +21,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// app.use((req, res, next) => {
-//   res.header('Access-Control-Allow-Origin', '*');
-//   res.header('Access-Control-Allow-Credentials', true);
-//   res.header('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With');
-//   res.header('Access-Control-Allow-Methods', 'PUT, GET, POST', 'OPTIONS');
-//
-//   next();
-// });
 
 
 app.post('/getDataBase', (reg, res) => {
@@ -72,12 +64,13 @@ app.use((err, req, res, next) => {
     return;
   }
   if (err instanceof HttpError) {
-    res.sendHttpError(err);
+    res.json(err);
     logger.error(err.stack);
     return;
   }
   logger.error(err.stack);
-  res.sendHttpError(new HttpError({
+  res.status(500);
+  res.json(new HttpError({
     status: 500,
     message: 'server Error',
   }));

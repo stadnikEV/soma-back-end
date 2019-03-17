@@ -8,13 +8,15 @@ module.exports = (req, res, next) => {
   // const params = getParams({ req });
   const companyName = req.body.companyName;
   let fio = req.body.fio;
+  const matchCompanyProcent = req.body.matchCompanyProcent;
+  const matchFioProcent = req.body.matchFioProcent;
 
   const companies = createCompanyField({ companyName });
   const name = getName({ fio: fio.toLowerCase() });
   fio = [name.lastName, name.firstName, name.fatherName];
 
-  const companyQuery = getMatchReference({ arr: companies, fieldName: 'companyName', matchProcent: 60 });
-  const fioQuery = getMatchReference({ arr: fio, fieldName: 'fio', matchProcent: 59 });
+  const companyQuery = getMatchReference({ arr: companies, fieldName: 'companyName', matchProcent: matchCompanyProcent });
+  const fioQuery = getMatchReference({ arr: fio, fieldName: 'fio', matchProcent: matchFioProcent });
 
   Company.find({
     $and: [

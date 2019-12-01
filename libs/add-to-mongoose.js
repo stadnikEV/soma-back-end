@@ -1,7 +1,5 @@
 const mongoose = require('./mongoose');
 const createCompanyField = require('./create-company-field');
-const xlsxToJsonFile = require("./xlsx-to-json-file");
-const removeDirectory = require("./remove-directory");
 const jsonFileToObject = require("./json-file-to-object");
 const getName = require("./get-name");
 const saveAll = require("./mongoose-save-all");
@@ -10,47 +8,64 @@ const getFioFromComment = require("./get-fio-from-comment");
 const Company = require('../models/company');
 
     let data = null;
+    const errName = []
 
-    xlsxToJsonFile({
-      input: "db-excel.xlsx",
-      output: "1.json",
-    })
-      .then(() => {
-        return jsonFileToObject({ path: '1.json' });
-      })
+    jsonFileToObject({ path: '1.json' })
       .then((result) => {
-        data = result;
-        return removeDirectory({ path: '1.json' });
-      })
-      .then(() => {
+        data = result
         const documents = [];
 
-        data.forEach((row) => {
+        return new Promise((resolve) => {
+          const createCompany = () => {
+            if (data.length === 0) {
+              resolve(documents)
+              return
+            }
 
-          const fio = getFioFromComment({ comment: row.Комментарий });
+            const row = data.pop()
 
-          if (!fio) {
-            console.log(`Не корректное имя: ${row.Комментарий}`);
-            return;
+            console.log(data.length)
+
+            const fio = getFioFromComment({ comment: row.Комментарий });
+
+            if (!fio) {
+              console.log(`Не корректное имя: ${row.Комментарий}`);
+              errName.push(row.Комментарий)
+              createCompany()
+              return;
+            }
+            const name = getName({ fio: fio.toLowerCase() });
+            if (!name) {
+              console.log(`Не корректное имя: ${fio}`);
+              errName.push(fio)
+              createCompany()
+              return;
+            }
+            const company = new Company({
+              _id: new mongoose.Types.ObjectId(),
+              companyName: createCompanyField({ companyName: row.Компания }),
+              fio: [name.lastName, name.firstName, name.fatherName],
+              email: getEmail({ email: row.Почта }),
+            });
+
+            documents.push(company)
+
+            setTimeout(() => {
+              createCompany()
+            }, 1)
           }
-          const name = getName({ fio: fio.toLowerCase() });
-          if (!name) {
-            console.log(`Не корректное имя: ${fio}`);
-            return;
-          }
-          const company = new Company({
-            _id: new mongoose.Types.ObjectId(),
-            companyName: createCompanyField({ companyName: row.Компания }),
-            fio: [name.lastName, name.firstName, name.fatherName],
-            email: getEmail({ email: row.Почта }),
-          });
 
-          documents.push(company);
+          createCompany()
         })
-
+      })
+      .then((documents) => {
         return saveAll({ documents });
       })
       .then(() => {
+        errName.forEach((elem) => {
+          console.log('-------------------------')
+          console.log(elem)
+        })
         console.log('Данные сохранены');
       })
       .catch((e) => {

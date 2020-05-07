@@ -14,6 +14,15 @@ const schema = new Schema({
   email: [
     String,
   ],
+  inn: [
+    String,
+  ],
+  adress: [
+    String,
+  ],
+  phone: [
+    String,
+  ],
   created: {
     type: Date,
     default: Date.now

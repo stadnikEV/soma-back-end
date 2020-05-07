@@ -1,11 +1,11 @@
 const xlsxToJsonFile = require("./xlsx-to-json-file");
 const removeDirectory = require("./remove-directory");
 
-removeDirectory({ path: '1.json' })
+removeDirectory({ path: 'db-excel.json' })
   .then(() => {
     return xlsxToJsonFile({
       input: "db-excel.xlsx",
-      output: "1.json",
+      output: "db-excel.json",
     })
   })
   .then(() => {

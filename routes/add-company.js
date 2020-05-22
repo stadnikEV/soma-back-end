@@ -1,6 +1,7 @@
 const mongoose = require('../libs/mongoose');
 const createCompanyField = require('../libs/create-company-field');
 const getName = require("../libs/get-name");
+const getNumber = require('../libs/get-number');
 
 module.exports = (req, res, next) => {
   const Company = require('../models/company');
@@ -8,6 +9,7 @@ module.exports = (req, res, next) => {
   const companyName = req.body.companyName;
   const fio = req.body.fio;
   const email = req.body.email;
+  const inn = getNumber({ string: req.body.inn });
 
   const name = getName({ fio: fio.toLowerCase() });
 
@@ -16,6 +18,7 @@ module.exports = (req, res, next) => {
     companyName: createCompanyField({ companyName }),
     fio: [name.lastName, name.firstName, name.fatherName],
     email,
+    inn,
   });
 
   company.save()
